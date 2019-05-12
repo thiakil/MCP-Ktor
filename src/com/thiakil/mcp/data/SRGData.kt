@@ -48,10 +48,20 @@ data class SRGMethod(
     override val obfName: String,
     override val stableName: String,
     val obfSignature: String,
-    val stableSignature: String? = null//present in old style srg, not in tsrg
+    var _stableSignature: String? = null
 ): StableMapping {
-    fun getStableSignature(mapper: Remapper): String {
-        return stableSignature ?: mapper.mapMethodDesc(obfSignature)
+    constructor(obfName: String, stableName: String, obfSignature: String, mapper: Remapper): this(obfName, stableName, obfSignature) {
+        this.mapper = mapper
+    }
+
+    private var mapper: Remapper? = null
+
+    val stableSignature: String get() = when (_stableSignature) {
+        null -> {
+            _stableSignature = mapper!!.mapMethodDesc(obfSignature)
+            _stableSignature!!
+        }
+        else -> _stableSignature!!
     }
 }
 
