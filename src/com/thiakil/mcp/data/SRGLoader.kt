@@ -9,7 +9,35 @@ private operator fun MatchResult.get(group: String):String = groups[group]!!.val
 
 class SRGLoader(lines: List<String>):StableNameDB(){
     init {
-        lines.mapNotNull { CLASS_LINE.matchEntire(it) }.forEach { line ->
+        for (line in lines){
+            if (line.trim() == "") {
+                continue
+            }
+            val parts = line.split(' ')
+            when (parts[0]){
+                "CL:" -> addClass(SRGClass(parts[1], parts[2]))
+                "FD:" -> {
+                    val obfOwner = parts[1].substringBeforeLast('/')
+                    val obfName = parts[1].substringAfterLast('/')
+
+                    val deobfName = parts[2].substringAfterLast('/')
+
+                    this.classesByObf.getValue(obfOwner).fields.add(SRGField(obfName, deobfName))
+                }
+                "MD:" -> {//MD: a/a (I)La; net/minecraft/util/text/TextFormatting/func_175744_a (I)Lnet/minecraft/util/text/TextFormatting;
+                    val obfNameGroup = parts[1]
+                    val obfOwner = obfNameGroup.substringBeforeLast('/')
+                    val obfName = obfNameGroup.substringAfterLast('/')
+
+                    val deobfName = parts[3].substringAfterLast('/')
+
+                    this.classesByObf.getValue(obfOwner).methods.add(SRGMethod(obfName, deobfName, parts[2], parts[4]))
+                }
+                "PK:" -> {}
+                else -> error("unrecognised line: $line")
+            }
+        }
+        /*lines.mapNotNull { CLASS_LINE.matchEntire(it) }.forEach { line ->
             addClass(SRGClass(line.groupValues[1], line.groupValues[2]))
         }
         lines.mapNotNull { FIELD_LINE.matchEntire(it) }.forEach { line ->
@@ -28,7 +56,7 @@ class SRGLoader(lines: List<String>):StableNameDB(){
             val deobfName = line["stableName"].substringAfterLast('/')
 
             this.classesByObf.getValue(obfOwner).methods.add(SRGMethod(obfName, deobfName, line["obfDesc"], line["stableDesc"]))
-        }
+        }*/
     }
 
     companion object {
@@ -41,6 +69,6 @@ class SRGLoader(lines: List<String>):StableNameDB(){
 }
 
 fun main(){
-    val loader = SRGLoader(File("C:\\Users\\lex\\.gradle\\caches\\minecraft\\de\\oceanlabs\\mcp\\mcp\\1.12.2\\joined.srg").readLines())
+    val loader = SRGLoader(File("test/1.12.srg").readLines())
     println(loader.classesByObf)
 }
