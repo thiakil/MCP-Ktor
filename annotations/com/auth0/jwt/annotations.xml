@@ -1,0 +1,5 @@
+<root>
+    <item name='com.auth0.jwt.JWT com.auth0.jwt.interfaces.DecodedJWT decode(java.lang.String)'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+</root>

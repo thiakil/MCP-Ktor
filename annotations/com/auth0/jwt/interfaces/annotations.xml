@@ -1,0 +1,29 @@
+<root>
+    <item name='com.auth0.jwt.interfaces.Payload com.auth0.jwt.interfaces.Claim getClaim(java.lang.String)'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.lang.String getId()'>
+        <annotation name='org.jetbrains.annotations.Nullable'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.lang.String getIssuer()'>
+        <annotation name='org.jetbrains.annotations.Nullable'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.lang.String getSubject()'>
+        <annotation name='org.jetbrains.annotations.Nullable'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.util.Date getExpiresAt()'>
+        <annotation name='org.jetbrains.annotations.Nullable'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.util.Date getIssuedAt()'>
+        <annotation name='org.jetbrains.annotations.Nullable'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.util.Date getNotBefore()'>
+        <annotation name='org.jetbrains.annotations.Nullable'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.util.List&lt;java.lang.String&gt; getAudience()'>
+        <annotation name='org.jetbrains.annotations.Nullable'/>
+    </item>
+    <item name='com.auth0.jwt.interfaces.Payload java.util.Map&lt;java.lang.String,com.auth0.jwt.interfaces.Claim&gt; getClaims()'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+</root>

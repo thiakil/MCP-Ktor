@@ -1,0 +1,89 @@
+openapi: "3.0.2"
+info:
+  title: MCP Mappings API
+  description: API to get/set MCP mappings for Minecraft
+  version: 1.0.0
+servers:
+  - url: https://mcp.thiakil.com/api
+    description: Placeholder
+paths:
+  /versions:
+    get:
+      summary: Returns a list of Minecraft versions supported.
+      operationId: get-versions
+      tags:
+        - Versions
+      responses:
+        200:
+         description: Successful response
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/VersionList'
+  /{version}/classes:
+    get:
+      summary: Get a list of classes
+      operationId: get-classes
+      tags:
+        - Classes
+      parameters:
+        - name: version
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: A list of class names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - "net/minecraft/util/text/TextFormatting"
+                - "net/minecraft/crash/CrashReport"
+                - "net/minecraft/crash/CrashReportCategory"
+                - "net/minecraft/crash/CrashReportCategory$Entry"
+
+components:
+  schemas:
+    VersionList:
+      description: A list of minecraft versions
+      type: array
+      items:
+        $ref: '#/components/schemas/Version'
+      example:
+        - slug: "1.12.2"
+          major: 1
+          minor: 12
+          patch: 2
+        - slug: "1.13"
+          major: 1
+          minor: 12
+    Version:
+      type: object
+      description: A Semantic Version-like version
+      properties:
+        slug:
+          type: string
+          description: The URL Path Parameter for this version & string representation.
+        major:
+          type: integer
+          description: Major version number. The first dot separated number.
+        minor:
+          type: integer
+          description: Minor version number. The second dot separated number.
+        patch:
+          type: integer
+          description: Patch version number. The third dot separated number.
+      required:
+        - slug
+        - major
+        - minor
+      example:
+        slug: "1.12.2"
+        major: 1
+        minor: 12
+        patch: 2
