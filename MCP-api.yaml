@@ -11,6 +11,7 @@ paths:
     get:
       summary: Returns a list of Minecraft versions supported.
       operationId: get-versions
+      x-irc-equiv: versions
       tags:
         - Versions
       responses:
@@ -27,11 +28,7 @@ paths:
       tags:
         - Classes
       parameters:
-        - name: version
-          in: path
-          schema:
-            type: string
-          required: true
+        - $ref: '#/components/parameters/mcversion'
       responses:
         200:
           description: A list of class names
@@ -47,7 +44,141 @@ paths:
                 - "net/minecraft/crash/CrashReportCategory"
                 - "net/minecraft/crash/CrashReportCategory$Entry"
 
+  /{version}/classes/{classname}:
+    get:
+      summary: Get class info
+      operationId: get-class
+      x-irc-equiv: gc
+      tags:
+        - Classes
+      parameters:
+        - $ref: '#/components/parameters/mcversion'
+        - name: classname
+          in: path
+          description: The classname to retrieve. Can be fully qualified (dot separated) or without package.
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Class information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  obfName:
+                    type: string
+                    description: Obfuscated Mojang name
+                    required: true
+                  srgName:
+                    type: string
+                    description: SRG name
+                    required: true
+                  interfaces:
+                    description: Interfaces implemented directly
+                    type: array
+                    items:
+                      type: string
+                  extendedBy:
+                    description: Classes that extend this class
+                    type: array
+                    items:
+                      type: string
+        404:
+          description: Class name not found
+
+  /{version}/fields:
+    get:
+      summary: Get list of fields
+      tags: - Fields
+      operationId: get-fields
+      parameters:
+        - $ref: '#/components/parameters/mcversion'
+      responses:
+        200:
+          description: Field list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                description: Array of srg names
+
+  /{version}/fields/{fieldname}:
+    parameters:
+      - $ref: '#/components/parameters/mcversion'
+      - name: fieldname
+        in: path
+        description: The field SRG name to retrieve
+        schema:
+          type: string
+        required: true
+    get:
+      summary: Get field info
+      operationId: get-field
+      x-irc-equiv: gf
+      tags:
+        - Fields
+      responses:
+        200:
+          description: Field information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  obfName:
+                    type: string
+                    description: Obfuscated Mojang name
+                    required: true
+                  srgName:
+                    type: string
+                    description: SRG name
+                    required: true
+                  mappedName:
+                    type: string
+                    description: The MCP name, if assigned
+                  comment:
+                    type: string
+                    description: The MCP field comment, if assigned
+        404:
+          description: Field name not found
+    post:
+      summary: Set field info
+      operationId: set-field
+      x-irc-equiv: sf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mcpName:
+                  type: string
+                  description: New MCP name to set, ignored if same as existing name
+                comment:
+                  type: string
+                  description: Field comment to set
+      responses:
+        204:
+          description: Operation was successful
+        403:
+          description: Operation failed due to permission error - e.g. MCP name already set but request body contains new name & user is not authorised to do so
+        404:
+          description: Field name not found
+
+
 components:
+  parameters:
+    mcversion:
+      name: version
+      in: path
+      schema:
+        type: string
+      required: true
   schemas:
     VersionList:
       description: A list of minecraft versions
