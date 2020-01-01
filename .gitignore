@@ -6,3 +6,5 @@
 *.ipr
 *.iws
 /src-old
+/endpoint-annotation/build
+/endpoint-annotation/out

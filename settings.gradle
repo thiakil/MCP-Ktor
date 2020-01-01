@@ -1,1 +1,3 @@
 rootProject.name = "MCP-Ktor"
+include 'endpoint-annotation'
+

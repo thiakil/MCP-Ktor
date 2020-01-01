@@ -10,6 +10,7 @@ buildscript {
 
 apply plugin: 'kotlin'
 apply plugin: 'application'
+apply plugin: 'kotlin-kapt'
 
 group = 'com.thiakil.mcp'
 version =  '0.0.1'
@@ -59,5 +60,14 @@ dependencies {
     //compile "org.ow2.asm:asm-tree:$ow2_asm_version"
     //compile "org.ow2.asm:asm-util:$ow2_asm_version"
 
+    compile "io.swagger.core.v3:swagger-core:$swagger_core_version"
+
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
+
+    kapt project(":endpoint-annotation")
+    compileOnly project(":endpoint-annotation")
+}
+
+kapt {
+    includeCompileClasspath = true
 }

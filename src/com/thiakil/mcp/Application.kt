@@ -6,6 +6,9 @@ import com.thiakil.ktor.openid.OAuthServerSettings
 import com.thiakil.ktor.openid.openid
 import com.thiakil.mcp.api.MappedObject
 import com.thiakil.mcp.api.MappedName
+import com.thiakil.mcp.endpoints.ErrorCode
+import com.thiakil.mcp.endpoints.ErrorResponseException
+import com.thiakil.mcp.endpoints.GeneratedEndpointList
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -118,7 +121,19 @@ fun Application.module(testing: Boolean = false) {
         }
 
         route("/api") {
-
+            GeneratedEndpointList.ENDPOINTS.forEach { cmd->
+                route(cmd.apiPath, cmd.method) {
+                    handle {
+                        try {
+                            call.respond(cmd.respond(this))
+                        } catch (e: ErrorResponseException) {
+                            e.respond(call)
+                        } catch (e: Exception) {
+                            ErrorResponseException(ErrorCode.UNKNOWN_ERROR, "Internal error").respond(call)
+                        }
+                    }
+                }
+            }
         }
 
         get("/") {
