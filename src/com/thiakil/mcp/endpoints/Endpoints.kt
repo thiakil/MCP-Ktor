@@ -1,5 +1,7 @@
 package com.thiakil.mcp.endpoints
 
+import io.ktor.http.HttpMethod
+import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.BooleanSchema
 import io.swagger.v3.oas.models.media.Schema
@@ -21,44 +23,56 @@ fun parameter(
 }
 
 object Endpoints {
+    private val componentParams: MutableMap<String, Parameter> = mutableMapOf()
+
     val MCP_TEAM = arrayOf("mcp_team")
-    val OPTIONAL_VERSION = parameter("version", required = false)
-    val REGEX_ARG = parameter("regex_pattern")
+
+    val OPTIONAL_VERSION = refParam("optional_version", parameter("version", required = false).description("Specify this parameter to request an older version (MCP or Minecraft unless otherwise specified)")!!)
     val REGEX_ARGS =
         listOf(
-            REGEX_ARG, OPTIONAL_VERSION,
-            parameter(
+            refParam("regex_pattern", parameter("regex_pattern")),
+            OPTIONAL_VERSION,
+            refParam("restrict_type", parameter(
                 "restrict_types",
                 ArraySchema().items(StringSchema()._enum(listOf("class", "field", "method", "param")))
-            )
+            ).description("Specify one or more items to restrict the search to those types, default is to search all. Comma separated string"))
         )
-    val NAME_ARG = parameter("name")
-    val NAME_PATH_ARG = parameter("name", where = ArgLocation.Path)
-    val SINGLE_NAME_ARG = listOf(NAME_ARG)
+    val NAME_PATH_ARG = refParam("mcp_srg_name", parameter("name", where = ArgLocation.Path).description("MCP/SRG name. May use SRG index where meaning is not ambiguous.")!!)
+    val CLASS_NAME_PATH_ARG = refParam("class_name", parameter("name", where = ArgLocation.Path).description("SRG or Obf (Notch) class name")!!)
+    val SINGLE_CLASS_NAME_PATH_ARG = listOf(CLASS_NAME_PATH_ARG)
     val SINGLE_NAME_PATH_ARG = listOf(NAME_PATH_ARG)
     val SET_MEMBER_ARGS = listOf(
-        parameter(
-            "srg_name",
-            where = ArgLocation.Path
-        ),
-        parameter("new_name"),
-        parameter("comment", required = false),
-        parameter("force", BooleanSchema(), required = false)
+        NAME_PATH_ARG,
+        refParam("new_mcp_name", parameter("new_name").description("New name to set, ignored if already set and force=false")),
+        refParam("mcp_comment", parameter("comment", required = false).description("Comment to set, required if name has already been set. Must not be blank")),
+        refParam("force_set_member", parameter("force", BooleanSchema(), required = false).description("Only available to admins")!!)
     )
+
+    private fun refParam(globalName: String, parameter: Parameter): Parameter {
+        if (componentParams.containsKey(globalName)){
+            throw IllegalStateException("Global Name $globalName already exists")
+        }
+        componentParams[globalName] = parameter
+        return Parameter().`$ref`(globalName)
+    }
+
+    fun Components.addParams() {
+        if (parameters != null) {
+            parameters.keys.forEach {
+                if (componentParams.containsKey(it)) {
+                    throw IllegalStateException("Duplicate parameter: $it")
+                }
+            }
+        } else {
+            parameters = mutableMapOf()
+        }
+        parameters.putAll(componentParams)
+    }
 }
 
 // TODO move these into own files
 
-@Endpoint
-object GetClass : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "gc",
-    apiPath = "/classes/{name}",
-    pythonCallback = "getClass",
-    description = "Returns class information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = listOf(Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
-    allowPublic = true
-)
+
 
 @Endpoint
 object GetField : EndpointHandler<Unit>(
@@ -160,7 +174,7 @@ object UnnamedFields : EndpointHandler<Unit>(
     apiPath = "/classes/{name}/unnamed/fields",
     pythonCallback = "listMembers",
     description = "Returns a list of unnamed fields for a given class.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG,
+    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG,
     allowPublic = true
 )
 
@@ -171,7 +185,7 @@ object UnnamedMethods : EndpointHandler<Unit>(
     apiPath = "/classes/{name}/unnamed/methods",
     pythonCallback = "listMembers",
     description = "Returns a list of unnamed methods for a given class.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG,
+    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG,
     allowPublic = true
 )
 
@@ -182,7 +196,7 @@ object UnnamedParams : EndpointHandler<Unit>(
     apiPath = "/classes/{name}/unnamed/params",
     pythonCallback = "listMembers",
     description = "Returns a list of unnamed method parameters for a given class.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG,
+    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG,
     allowPublic = true
 )
 
@@ -194,7 +208,8 @@ object UndoChange : EndpointHandler<Unit>(
     pythonCallback = "undoChange",
     description = "Undoes the last *STAGED* name change to a given method/field/param. By default you can only undo your own changes.",
     parameters = Endpoints.SINGLE_NAME_PATH_ARG,
-    allowDuringReadonly = false
+    allowDuringReadonly = false,
+    method = HttpMethod.Patch
 )
 
 @Endpoint
@@ -205,7 +220,8 @@ object RedoChange : EndpointHandler<Unit>(
     pythonCallback = "undoChange",
     description = "Redoes the last *UNDONE* staged change to a given method/field/param. By default you can only redo your own changes.",
     parameters = Endpoints.SINGLE_NAME_PATH_ARG,
-    allowDuringReadonly = false
+    allowDuringReadonly = false,
+    method = HttpMethod.Patch
 )
 
 @Endpoint
@@ -245,36 +261,39 @@ object RemoveParamComment : EndpointHandler<Unit>(
 object SetField : EndpointHandler<Unit>(
     Unit::class,
     ircCommand = "sf",
-    apiPath = "/fields/set/{srg_name}",
+    apiPath = "/fields/{name}",
     pythonCallback = "setMember",
     description = "Sets the MCP name and comment for the SRG field specified. SRG index can also be used. Force param can only be used by admins.",
     parameters = Endpoints.SET_MEMBER_ARGS,
     allowPublic = true,
-    allowDuringReadonly = false
+    allowDuringReadonly = false,
+    method = HttpMethod.Post
 )
 
 @Endpoint
 object SetMethod : EndpointHandler<Unit>(
     Unit::class,
     ircCommand = "sm",
-    apiPath = "/methods/set/{srg_name}",
+    apiPath = "/methods/{name}",
     pythonCallback = "setMember",
     description = "Sets the MCP name and comment for the SRG method specified. SRG index can also be used. Force param can only be used by admins.",
     parameters = Endpoints.SET_MEMBER_ARGS,
     allowPublic = true,
-    allowDuringReadonly = false
+    allowDuringReadonly = false,
+    method = HttpMethod.Post
 )
 
 @Endpoint
 object SetParam : EndpointHandler<Unit>(
     Unit::class,
     ircCommand = "sp",
-    apiPath = "/params/set/{srg_name}",
+    apiPath = "/params/{name}",
     pythonCallback = "setMember",
     description = "Sets the MCP name and comment for the SRG method parameter specified. SRG index can also be used. Force param can only be used by admins.",
     parameters = Endpoints.SET_MEMBER_ARGS,
     allowPublic = true,
-    allowDuringReadonly = false
+    allowDuringReadonly = false,
+    method = HttpMethod.Post
 )
 
 @Endpoint
@@ -289,7 +308,8 @@ object Lock : EndpointHandler<Unit>(
         Endpoints.NAME_PATH_ARG,
         parameter("member_type", required = false)
     ),
-    allowDuringReadonly = false
+    allowDuringReadonly = false,
+    method = HttpMethod.Patch
 )
 
 @Endpoint
@@ -304,5 +324,6 @@ object Unlock : EndpointHandler<Unit>(
         Endpoints.NAME_PATH_ARG,
         parameter("member_type", required = false)
     ),
-    allowDuringReadonly = false
+    allowDuringReadonly = false,
+    method = HttpMethod.Patch
 )

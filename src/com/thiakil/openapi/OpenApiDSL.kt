@@ -1,9 +1,6 @@
 package com.thiakil.openapi
 
-import io.swagger.v3.oas.models.OpenAPI
-import io.swagger.v3.oas.models.Operation
-import io.swagger.v3.oas.models.PathItem
-import io.swagger.v3.oas.models.Paths
+import io.swagger.v3.oas.models.*
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.Content
@@ -72,7 +69,15 @@ class OpenApiKt : OpenAPI(){
         }
         (paths as PathsKt).apply(body)
     }
+
+    @OpenApiDSL
+    fun components(body: Body<ComponentsKt>) {
+        components = ComponentsKt().apply(body)
+    }
 }
+
+@OpenApiDSL
+class ComponentsKt: Components()
 
 @OpenApiDSL
 fun openApi(body: Body<OpenApiKt>): OpenApiKt = OpenApiKt().apply(body)

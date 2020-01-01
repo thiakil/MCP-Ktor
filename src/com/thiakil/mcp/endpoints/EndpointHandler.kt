@@ -13,11 +13,11 @@ import kotlin.reflect.KClass
  */
 abstract class EndpointHandler<T: Any>(
     val responseType: KClass<T>,
-    val ircCommand: String = "",
+    val ircCommand: String? = null,
     val apiPath: String,
-    val pythonCallback: String = "",
+    val pythonCallback: String? = null,
     val groups: Array<String> = emptyArray(),
-    val description: String = "",
+    val description: String,
     val parameters: List<Parameter>? = null,
     val allowPublic: Boolean = false,
     val allowDuringReadonly: Boolean = true,

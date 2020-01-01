@@ -1,22 +1,18 @@
 package com.thiakil.mcp
 
+import com.thiakil.mcp.endpoints.Endpoints
+import com.thiakil.mcp.endpoints.Endpoints.addParams
 import com.thiakil.mcp.endpoints.GeneratedEndpointList
 import com.thiakil.openapi.openApi
 import com.thiakil.openapi.openApiSchema
-import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.http.ContentType
-import io.ktor.response.header
-import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.routing.get
-import io.ktor.util.pipeline.PipelineContext
 import io.swagger.v3.core.util.Json
 import io.swagger.v3.core.util.Yaml
 import io.swagger.v3.oas.models.OpenAPI
-import io.swagger.v3.oas.models.info.Info
-import kotlin.reflect.full.memberFunctions
 
 fun Route.apiSchema() {
     get("/schema.yml") {
@@ -114,10 +110,14 @@ private fun generateSchema(): OpenAPI {
                                     }
                                 }
                             }
+                            endpoint.ircCommand?.let { addExtension("x-IRC-command", it) }
                         }
                     }
                 }
             }
+        }
+        components {
+            addParams()
         }
     }
 }
