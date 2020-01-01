@@ -1,19 +1,14 @@
 package com.thiakil.openapi
 
-import io.swagger.v3.core.util.Yaml
+import io.swagger.v3.core.util.AnnotationsUtils
 import io.swagger.v3.oas.models.media.*
 import java.math.BigInteger
 import java.util.*
-import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KProperty
-import kotlin.reflect.KType
+import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaField
 
-/**
- * Created by Thiakil on 31/12/2019.
- */
 // https://stackoverflow.com/a/38084930
 class LazyWithReceiver<This,Return>(val initializer:This.()->Return)
 {
@@ -33,13 +28,14 @@ val KClassifier.openApiSchema: Schema<*>
         else -> throw RuntimeException("Classifier isn't KClass??")
     }
 
-val KType.openApiType : Schema<*> by LazyWithReceiver<KType, Schema<*>> {
+val KType.openApiSchema : Schema<*> by LazyWithReceiver<KType, Schema<*>> {
     when (val classifier = classifier) {
         String::class -> StringSchema()
         Int::class, Long::class -> IntegerSchema()
         Float::class, Double::class, BigInteger::class -> NumberSchema()
         Boolean::class -> BooleanSchema()
         List::class -> arrayType()
+        Date::class -> DateTimeSchema()
         null -> throw RuntimeException("Classifier was null??")
         else -> {
             if (classifier.javaClass.isArray) {
@@ -72,17 +68,29 @@ val <T : Any> KClass<T>.openApiSchema: Schema<*> by LazyWithReceiver<KClass<T>, 
             schema.type = "object"
 
             this.memberProperties.forEach { prop ->
-                val type: Schema<*> = prop.returnType.openApiType
-                prop.findAnnotation<Description>()?.let {
-                        if (it.value != "") {
-                            type.description = it.value
+                val type: Schema<*> = AnnotationsUtils.getSchemaFromAnnotation(prop.findAnnotationMulti(), null).map {
+                    if (it.type.isBlank || it.name.isBlank) {
+                        val reflectedSchema = prop.returnType.openApiSchema
+                        if (it.type.isBlank) {
+                            it.type = reflectedSchema.type
+                        }
+                        if (it.name.isBlank) {
+                            it.name = reflectedSchema.name
                         }
                     }
+                    return@map it
+                }.orElseGet { prop.returnType.openApiSchema }
                 schema.addProperties(prop.name, type)
             }
         }
     }
 }
 
-@Target(AnnotationTarget.PROPERTY)
-annotation class Description(val value: String)
+val String?.isBlank: Boolean get() = this == null || this == "" || this.trim() == ""
+val String?.isNotBlank: Boolean get() = !isBlank
+
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T : Annotation> KProperty<*>.findAnnotationMulti(): T? =
+    annotations.firstOrNull { it is T } as T?
+        ?: javaField?.getAnnotation(T::class.java)
+        ?: getter.findAnnotation()

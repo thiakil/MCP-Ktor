@@ -136,9 +136,7 @@ fun Application.module(testing: Boolean = false) {
             }
         }
 
-        get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
+        apiSchema()
 
         get("/session/increment") {
             /*val session = call.sessions.get<MySession>() ?: MySession()

@@ -25,7 +25,7 @@ object Endpoints {
     val OPTIONAL_VERSION = parameter("version", required = false)
     val REGEX_ARG = parameter("regex_pattern")
     val REGEX_ARGS =
-        arrayOf(
+        listOf(
             REGEX_ARG, OPTIONAL_VERSION,
             parameter(
                 "restrict_types",
@@ -34,9 +34,9 @@ object Endpoints {
         )
     val NAME_ARG = parameter("name")
     val NAME_PATH_ARG = parameter("name", where = ArgLocation.Path)
-    val SINGLE_NAME_ARG = arrayOf(NAME_ARG)
-    val SINGLE_NAME_PATH_ARG = arrayOf(NAME_PATH_ARG)
-    val SET_MEMBER_ARGS = arrayOf(
+    val SINGLE_NAME_ARG = listOf(NAME_ARG)
+    val SINGLE_NAME_PATH_ARG = listOf(NAME_PATH_ARG)
+    val SET_MEMBER_ARGS = listOf(
         parameter(
             "srg_name",
             where = ArgLocation.Path
@@ -51,41 +51,45 @@ object Endpoints {
 
 @Endpoint
 object GetClass : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "gc",
     apiPath = "/classes/{name}",
     pythonCallback = "getClass",
     description = "Returns class information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = arrayOf(Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
+    parameters = listOf(Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
     allowPublic = true
 )
 
 @Endpoint
 object GetField : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "gf",
     apiPath = "/fields/{name}",
     pythonCallback = "getMember",
     description = "Returns field information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = arrayOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
+    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
     allowPublic = true
 )
 
 @Endpoint
 object GetMethod : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "gm",
     apiPath = "/methods/{name}",
     pythonCallback = "getMember",
     description = "Returns method information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = arrayOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
+    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
     allowPublic = true
 )
 
 @Endpoint
 object GetParam : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "gp",
     apiPath = "/params/{name}",
     pythonCallback = "getParam",
     description = "Returns method parameter information. Defaults to current version. Version can be for MCP or MC. Obf class and method names not supported.",
-    parameters = arrayOf(
+    parameters = listOf(
         parameter("class", required = false),
         parameter("method", required = false),
         Endpoints.NAME_PATH_ARG,
@@ -96,6 +100,7 @@ object GetParam : EndpointHandler<Unit>(
 
 @Endpoint
 object FindKey : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "find",
     apiPath = "/find",
     pythonCallback = "findKey",
@@ -106,6 +111,7 @@ object FindKey : EndpointHandler<Unit>(
 
 @Endpoint
 object FindAll : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "findall",
     apiPath = "/find-all",
     pythonCallback = "findAllKey",
@@ -116,6 +122,7 @@ object FindAll : EndpointHandler<Unit>(
 
 @Endpoint
 object FieldHistory : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "fh",
     apiPath = "/fields/{name}/history",
     pythonCallback = "getHistory",
@@ -126,6 +133,7 @@ object FieldHistory : EndpointHandler<Unit>(
 
 @Endpoint
 object MethodHistory : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "mh",
     apiPath = "/methods/{name}/history",
     pythonCallback = "getHistory",
@@ -136,6 +144,7 @@ object MethodHistory : EndpointHandler<Unit>(
 
 @Endpoint
 object ParamHistory : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "ph",
     apiPath = "/params/{name}/history",
     pythonCallback = "getHistory",
@@ -146,6 +155,7 @@ object ParamHistory : EndpointHandler<Unit>(
 
 @Endpoint
 object UnnamedFields : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "uf",
     apiPath = "/classes/{name}/unnamed/fields",
     pythonCallback = "listMembers",
@@ -156,6 +166,7 @@ object UnnamedFields : EndpointHandler<Unit>(
 
 @Endpoint
 object UnnamedMethods : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "um",
     apiPath = "/classes/{name}/unnamed/methods",
     pythonCallback = "listMembers",
@@ -166,6 +177,7 @@ object UnnamedMethods : EndpointHandler<Unit>(
 
 @Endpoint
 object UnnamedParams : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "up",
     apiPath = "/classes/{name}/unnamed/params",
     pythonCallback = "listMembers",
@@ -176,6 +188,7 @@ object UnnamedParams : EndpointHandler<Unit>(
 
 @Endpoint
 object UndoChange : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "undo",
     apiPath = "/undo/{name}",
     pythonCallback = "undoChange",
@@ -186,6 +199,7 @@ object UndoChange : EndpointHandler<Unit>(
 
 @Endpoint
 object RedoChange : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "redo",
     apiPath = "/redo/{name}",
     pythonCallback = "undoChange",
@@ -196,6 +210,7 @@ object RedoChange : EndpointHandler<Unit>(
 
 @Endpoint
 object RemoveFieldComment : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "rfc",
     apiPath = "/manage/remove-field-comment/{name}",
     pythonCallback = "removeComment",
@@ -206,6 +221,7 @@ object RemoveFieldComment : EndpointHandler<Unit>(
 
 @Endpoint
 object RemoveMethodComment : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "rmc",
     apiPath = "/manage/remove-method-comment/{name}",
     pythonCallback = "removeComment",
@@ -216,6 +232,7 @@ object RemoveMethodComment : EndpointHandler<Unit>(
 
 @Endpoint
 object RemoveParamComment : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "rpc",
     apiPath = "/manage/remove-param-comment/{name}",
     pythonCallback = "removeComment",
@@ -226,6 +243,7 @@ object RemoveParamComment : EndpointHandler<Unit>(
 
 @Endpoint
 object SetField : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "sf",
     apiPath = "/fields/set/{srg_name}",
     pythonCallback = "setMember",
@@ -237,6 +255,7 @@ object SetField : EndpointHandler<Unit>(
 
 @Endpoint
 object SetMethod : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "sm",
     apiPath = "/methods/set/{srg_name}",
     pythonCallback = "setMember",
@@ -248,6 +267,7 @@ object SetMethod : EndpointHandler<Unit>(
 
 @Endpoint
 object SetParam : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "sp",
     apiPath = "/params/set/{srg_name}",
     pythonCallback = "setMember",
@@ -259,12 +279,13 @@ object SetParam : EndpointHandler<Unit>(
 
 @Endpoint
 object Lock : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "lock",
     apiPath = "/manage/lock/{name}",
     pythonCallback = "setLocked",
     groups = arrayOf("lock_control", "mcp_team"),
     description = "Locks the given field/method/parameter from being edited. Full SRG name must be used if member_type not specified.",
-    parameters = arrayOf(
+    parameters = listOf(
         Endpoints.NAME_PATH_ARG,
         parameter("member_type", required = false)
     ),
@@ -273,12 +294,13 @@ object Lock : EndpointHandler<Unit>(
 
 @Endpoint
 object Unlock : EndpointHandler<Unit>(
+    Unit::class,
     ircCommand = "unlock",
     apiPath = "/manage/unlock/{name}",
     pythonCallback = "setLocked",
     groups = arrayOf("lock_control", "mcp_team"),
     description = "Unlocks the given field/method/parameter to allow editing. Full SRG name must be used if member_type not specified.",
-    parameters = arrayOf(
+    parameters = listOf(
         Endpoints.NAME_PATH_ARG,
         parameter("member_type", required = false)
     ),

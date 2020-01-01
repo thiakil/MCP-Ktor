@@ -6,17 +6,19 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import io.swagger.v3.oas.models.parameters.Parameter
+import kotlin.reflect.KClass
 
 /**
  * Created by Thiakil on 30/12/2019.
  */
 abstract class EndpointHandler<T: Any>(
+    val responseType: KClass<T>,
     val ircCommand: String = "",
     val apiPath: String,
     val pythonCallback: String = "",
     val groups: Array<String> = emptyArray(),
     val description: String = "",
-    val parameters: Array<Parameter> = emptyArray(),
+    val parameters: List<Parameter>? = null,
     val allowPublic: Boolean = false,
     val allowDuringReadonly: Boolean = true,
     val method: HttpMethod = HttpMethod.Get
