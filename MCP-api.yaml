@@ -29,6 +29,7 @@ paths:
         - Classes
       parameters:
         - $ref: '#/components/parameters/mcversion'
+        - $ref: '#/components/parameters/unmapped-filter'
       responses:
         200:
           description: A list of class names
@@ -86,15 +87,17 @@ paths:
                     items:
                       type: string
         404:
-          description: Class name not found
+          $ref: '#/components/responses/NotFound'
 
   /{version}/fields:
     get:
       summary: Get list of fields
-      tags: - Fields
+      tags:
+        - Fields
       operationId: get-fields
       parameters:
         - $ref: '#/components/parameters/mcversion'
+        - $ref: '#/components/parameters/unmapped-filter'
       responses:
         200:
           description: Field list
@@ -109,12 +112,7 @@ paths:
   /{version}/fields/{fieldname}:
     parameters:
       - $ref: '#/components/parameters/mcversion'
-      - name: fieldname
-        in: path
-        description: The field SRG name to retrieve
-        schema:
-          type: string
-        required: true
+      - $ref: '#/components/parameters/field-name'
     get:
       summary: Get field info
       operationId: get-field
@@ -144,11 +142,13 @@ paths:
                     type: string
                     description: The MCP field comment, if assigned
         404:
-          description: Field name not found
+          $ref: '#/components/responses/NotFound'
     post:
       summary: Set field info
       operationId: set-field
       x-irc-equiv: sf
+      tags:
+        - Fields
       requestBody:
         required: true
         content:
@@ -168,14 +168,152 @@ paths:
         403:
           description: Operation failed due to permission error - e.g. MCP name already set but request body contains new name & user is not authorised to do so
         404:
-          description: Field name not found
+          $ref: '#/components/responses/NotFound'
 
+  /{version}/fields/{fieldname}/history:
+    parameters:
+      - $ref: '#/components/parameters/mcversion'
+      - $ref: '#/components/parameters/field-name'
+    get:
+      summary: Get field history
+      operationId: get-field-history
+      x-irc-equiv: fh
+      tags:
+        - Fields
+      responses:
+        200:
+          description: Field History list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoryEntry'
+
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /{version}/methods:
+    get:
+      summary: Get list of methods
+      tags:
+        - Methods
+      operationId: get-methods
+      parameters:
+        - $ref: '#/components/parameters/mcversion'
+        - $ref: '#/components/parameters/unmapped-filter'
+      responses:
+        200:
+          description: Method list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                description: Array of srg names
+
+  /{version}/methods/{methodname}:
+    parameters:
+      - $ref: '#/components/parameters/mcversion'
+      - name: methodname
+        in: path
+        description: The method SRG name to retrieve
+        schema:
+          type: string
+        required: true
+    get:
+      summary: Get method info
+      operationId: get-method
+      x-irc-equiv: gm
+      tags:
+        - Methods
+      responses:
+        200:
+          description: Method information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  obfName:
+                    type: string
+                    description: Obfuscated Mojang name
+                    required: true
+                  obfDesc:
+                    type: string
+                    description: Obfuscated Mojang bytecode descriptor
+                    required: true
+                  srgName:
+                    type: string
+                    description: SRG name
+                    required: true
+                  mappedName:
+                    type: string
+                    description: The MCP name, if assigned
+                  comment:
+                    type: string
+                    description: The MCP method comment, if assigned
+                  params:
+                    required: false
+                    type: array
+                    items:
+                      type: string
+                    description: An array of SRG params associated with this method (if any)
+        404:
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Set method info
+      operationId: set-method
+      x-irc-equiv: sm
+      tags:
+        - Methods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mcpName:
+                  type: string
+                  description: New MCP name to set, ignored if same as existing name
+                comment:
+                  type: string
+                  description: Field comment to set
+      responses:
+        204:
+          description: Operation was successful
+        403:
+          description: Operation failed due to permission error - e.g. MCP name already set but request body contains new name & user is not authorised to do so
+        404:
+          $ref: '#/components/responses/NotFound'
 
 components:
   parameters:
     mcversion:
       name: version
       in: path
+      schema:
+        type: string
+      required: true
+    unmapped-filter:
+      name: filter
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - none
+          - unmapped-any
+          - unmapped-fields
+          - unmapped-methods
+        default: none
+      description: When specified, return only items which have unmapped members.
+    field-name:
+      name: fieldname
+      in: path
+      description: The field SRG name to retrieve
       schema:
         type: string
       required: true
@@ -218,3 +356,101 @@ components:
         major: 1
         minor: 12
         patch: 2
+    McpUser:
+      type: object
+      description: A user registered with MCP, using the website or a direct token
+      properties:
+        type:
+          type: string
+          enum:
+            - mcp-user
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Human readable display name
+    BotUser:
+      type: object
+      description: A Bot, acting on behalf of someone
+      properties:
+        type:
+          type: string
+          enum:
+            - bot-user
+        mcpUserId:
+          type: string
+          format: uuid
+          description: The real user who performed the task (where the bot can verify via token)
+          required: false
+        name:
+          type: string
+          description: Human readable display name (from bot, or MCP display name when applicable)
+        botName:
+          type: string
+          description: Display name for the Bot Application
+    IrcUser:
+      type: object
+      description: A legacy author from IRC
+      properties:
+        type:
+          type: string
+          enum:
+            - irc-user
+        handle:
+          type: string
+          description: IRC handle
+    HistoryEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: 2007-04-06T00:00Z
+          description: ISO 8601 timestamp of history event
+        version:
+          type: string
+          description: Minecraft version for the change
+          example: 1.12.2
+        type:
+          type: string
+          enum:
+            - set
+            - undo
+          description: Whether this was a set operation or an undo action
+        state:
+          type: string
+          enum:
+            - committed
+            - staged
+        newName:
+          type: string
+          description: The new name set, if applicable. When not supplied, name was not changed
+          required: false
+        newComment:
+          type: string
+          description: The new comment set, if applicable. When not supplied, comment was not changed
+          required: false
+        author:
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/McpUser'
+            - $ref: '#/components/schemas/BotUser'
+            - $ref: '#/components/schemas/IrcUser'
+          discriminator:
+            propertyName: type
+          example:
+            type: mcp-user
+            userId: 1234-1234-1231-1234
+            name: John_Doe
+  responses:
+    NotFound:
+      description: Name not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Human readable error message
