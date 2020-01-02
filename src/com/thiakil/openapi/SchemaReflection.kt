@@ -125,6 +125,12 @@ val <T : Any> KClass<T>.openApiSchema: Schema<*> by LazyWithReceiver<KClass<T>, 
         java.isArray -> ArraySchema().also {
             it.items = java.componentType.kotlin.openApiSchema
         }
+        this == String::class -> StringSchema()
+        this == Int::class || this == Long::class -> IntegerSchema()
+        this == Float::class || this == Double::class || this == BigInteger::class -> NumberSchema()
+        this == Boolean::class -> BooleanSchema()
+        this == Date::class -> DateTimeSchema()
+        this == Unit::class -> ObjectSchema()
         else -> Schema<T>().also { schema ->
             schema.name = this.simpleName
             schema.type = "object"
@@ -137,10 +143,12 @@ val <T : Any> KClass<T>.openApiSchema: Schema<*> by LazyWithReceiver<KClass<T>, 
                     reflectedSchema is ArraySchema && annotatedSchema is ArraySchema -> {
                         annotatedSchema.also {
                             it.name = reflectedSchema.name
-                            if (it.items != null)
+                            if (it.items != null) {
                                 it.items.type = reflectedSchema.items.type //force type to be from reflection
-                            else
+                                it.items.name = reflectedSchema.items.name
+                            } else {
                                 it.items = reflectedSchema.items
+                            }
                         }
                     }
                     reflectedSchema !is ArraySchema && annotatedSchema !is ArraySchema -> {
