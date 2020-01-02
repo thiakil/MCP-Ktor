@@ -5,7 +5,6 @@ import io.ktor.application.ApplicationCall
 import io.ktor.util.pipeline.PipelineContext
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
-import java.time.Instant
 import java.util.*
 
 data class McpVersion(
@@ -36,8 +35,7 @@ data class InfoResponse(
 object InfoEndpoint : EndpointHandler<InfoResponse>(
     InfoResponse::class,
     apiPath = "/",
-    description = "Basic api info, combination of IRC commands versions, testcsv, and exports",
-    allowPublic = true
+    description = "Basic api info, combination of IRC commands versions, testcsv, and exports"
 ) {
     override fun respond(context: PipelineContext<Unit, ApplicationCall>): InfoResponse {
         return InfoResponse(

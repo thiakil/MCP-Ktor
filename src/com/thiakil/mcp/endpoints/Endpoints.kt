@@ -81,8 +81,7 @@ object GetField : EndpointHandler<Unit>(
     apiPath = "/fields/{name}",
     pythonCallback = "getMember",
     description = "Returns field information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
-    allowPublic = true
+    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION)
 )
 
 @Endpoint
@@ -92,8 +91,7 @@ object GetMethod : EndpointHandler<Unit>(
     apiPath = "/methods/{name}",
     pythonCallback = "getMember",
     description = "Returns method information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
-    allowPublic = true
+    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION)
 )
 
 @Endpoint
@@ -108,8 +106,7 @@ object GetParam : EndpointHandler<Unit>(
         parameter("method", required = false),
         Endpoints.NAME_PATH_ARG,
         Endpoints.OPTIONAL_VERSION
-    ),
-    allowPublic = true
+    )
 )
 
 @Endpoint
@@ -119,8 +116,7 @@ object FindKey : EndpointHandler<Unit>(
     apiPath = "/find",
     pythonCallback = "findKey",
     description = "Returns any entries matching a regex pattern. Only returns complete matches.",
-    parameters = Endpoints.REGEX_ARGS,
-    allowPublic = true
+    parameters = Endpoints.REGEX_ARGS
 )
 
 @Endpoint
@@ -130,8 +126,7 @@ object FindAll : EndpointHandler<Unit>(
     apiPath = "/find-all",
     pythonCallback = "findAllKey",
     description = "Returns any entries matching a regex pattern. Allows partial matches to be returned.",
-    parameters = Endpoints.REGEX_ARGS,
-    allowPublic = true
+    parameters = Endpoints.REGEX_ARGS
 )
 
 @Endpoint
@@ -141,8 +136,7 @@ object FieldHistory : EndpointHandler<Unit>(
     apiPath = "/fields/{name}/history",
     pythonCallback = "getHistory",
     description = "Gets the change history for the given field. Using MCP name allows you to search for changes to/from that name. SRG index is also accepted.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG,
-    allowPublic = true
+    parameters = Endpoints.SINGLE_NAME_PATH_ARG
 )
 
 @Endpoint
@@ -152,8 +146,7 @@ object MethodHistory : EndpointHandler<Unit>(
     apiPath = "/methods/{name}/history",
     pythonCallback = "getHistory",
     description = "Gets the change history for the given method. Using MCP name allows you to search for changes to/from that name. SRG index is also accepted.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG,
-    allowPublic = true
+    parameters = Endpoints.SINGLE_NAME_PATH_ARG
 )
 
 @Endpoint
@@ -163,8 +156,7 @@ object ParamHistory : EndpointHandler<Unit>(
     apiPath = "/params/{name}/history",
     pythonCallback = "getHistory",
     description = "Gets the change history for the given method param. SRG index is also accepted.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG,
-    allowPublic = true
+    parameters = Endpoints.SINGLE_NAME_PATH_ARG
 )
 
 @Endpoint
@@ -174,8 +166,7 @@ object UnnamedFields : EndpointHandler<Unit>(
     apiPath = "/classes/{name}/unnamed/fields",
     pythonCallback = "listMembers",
     description = "Returns a list of unnamed fields for a given class.",
-    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG,
-    allowPublic = true
+    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG
 )
 
 @Endpoint
@@ -185,8 +176,7 @@ object UnnamedMethods : EndpointHandler<Unit>(
     apiPath = "/classes/{name}/unnamed/methods",
     pythonCallback = "listMembers",
     description = "Returns a list of unnamed methods for a given class.",
-    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG,
-    allowPublic = true
+    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG
 )
 
 @Endpoint
@@ -196,8 +186,7 @@ object UnnamedParams : EndpointHandler<Unit>(
     apiPath = "/classes/{name}/unnamed/params",
     pythonCallback = "listMembers",
     description = "Returns a list of unnamed method parameters for a given class.",
-    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG,
-    allowPublic = true
+    parameters = Endpoints.SINGLE_CLASS_NAME_PATH_ARG
 )
 
 @Endpoint
@@ -265,7 +254,6 @@ object SetField : EndpointHandler<Unit>(
     pythonCallback = "setMember",
     description = "Sets the MCP name and comment for the SRG field specified. SRG index can also be used. Force param can only be used by admins.",
     parameters = Endpoints.SET_MEMBER_ARGS,
-    allowPublic = true,
     allowDuringReadonly = false,
     method = HttpMethod.Post
 )
@@ -278,7 +266,6 @@ object SetMethod : EndpointHandler<Unit>(
     pythonCallback = "setMember",
     description = "Sets the MCP name and comment for the SRG method specified. SRG index can also be used. Force param can only be used by admins.",
     parameters = Endpoints.SET_MEMBER_ARGS,
-    allowPublic = true,
     allowDuringReadonly = false,
     method = HttpMethod.Post
 )
@@ -291,7 +278,6 @@ object SetParam : EndpointHandler<Unit>(
     pythonCallback = "setMember",
     description = "Sets the MCP name and comment for the SRG method parameter specified. SRG index can also be used. Force param can only be used by admins.",
     parameters = Endpoints.SET_MEMBER_ARGS,
-    allowPublic = true,
     allowDuringReadonly = false,
     method = HttpMethod.Post
 )

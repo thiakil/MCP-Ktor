@@ -10,8 +10,7 @@ object GetClass : EndpointHandler<GetClassResult>(
     apiPath = "/classes/{name}",
     pythonCallback = "getClass",
     description = "Returns class information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = listOf(Endpoints.CLASS_NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION),
-    allowPublic = true
+    parameters = listOf(Endpoints.CLASS_NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION)
 )
 
 //todo class type, mojang mapped name?

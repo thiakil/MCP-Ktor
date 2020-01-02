@@ -19,7 +19,6 @@ abstract class EndpointHandler<T: Any>(
     val groups: Array<String> = emptyArray(),
     val description: String,
     val parameters: List<Parameter>? = null,
-    val allowPublic: Boolean = false,
     val allowDuringReadonly: Boolean = true,
     val method: HttpMethod = HttpMethod.Get
 ) {
