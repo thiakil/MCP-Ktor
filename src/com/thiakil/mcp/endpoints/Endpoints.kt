@@ -74,60 +74,6 @@ object Endpoints {
 
 
 
-@Endpoint
-object GetField : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "gf",
-    apiPath = "/fields/{name}",
-    pythonCallback = "getMember",
-    description = "Returns field information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION)
-)
-
-@Endpoint
-object GetMethod : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "gm",
-    apiPath = "/methods/{name}",
-    pythonCallback = "getMember",
-    description = "Returns method information. Defaults to current version. Version can be for MCP or MC.",
-    parameters = listOf(parameter("class", required = false), Endpoints.NAME_PATH_ARG, Endpoints.OPTIONAL_VERSION)
-)
-
-@Endpoint
-object GetParam : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "gp",
-    apiPath = "/params/{name}",
-    pythonCallback = "getParam",
-    description = "Returns method parameter information. Defaults to current version. Version can be for MCP or MC. Obf class and method names not supported.",
-    parameters = listOf(
-        parameter("class", required = false),
-        parameter("method", required = false),
-        Endpoints.NAME_PATH_ARG,
-        Endpoints.OPTIONAL_VERSION
-    )
-)
-
-@Endpoint
-object FindKey : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "find",
-    apiPath = "/find",
-    pythonCallback = "findKey",
-    description = "Returns any entries matching a regex pattern. Only returns complete matches.",
-    parameters = Endpoints.REGEX_ARGS
-)
-
-@Endpoint
-object FindAll : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "findall",
-    apiPath = "/find-all",
-    pythonCallback = "findAllKey",
-    description = "Returns any entries matching a regex pattern. Allows partial matches to be returned.",
-    parameters = Endpoints.REGEX_ARGS
-)
 
 @Endpoint
 object FieldHistory : EndpointHandler<Unit>(
