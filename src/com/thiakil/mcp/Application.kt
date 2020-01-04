@@ -52,19 +52,6 @@ object MemoryNonceGenerator: NonceManager {
 
 }
 
-val googleOauthProvider = OAuthServerSettings.FromDiscoveryURL(
-    name = "google",
-    discoveryUrl = "https://accounts.google.com/.well-known/openid-configuration",
-    /*authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
-    accessTokenUrl = "https://www.googleapis.com/oauth2/v3/token",*/
-    requestMethod = HttpMethod.Post,
-
-    clientId = "574579380105-p5mhb56cf2ql53d5qkuod3jvmgc13qhs.apps.googleusercontent.com", // @TODO: Remember to change this!
-    clientSecret = "7BBeAN2bVZgzwMThLrbjnPqQ", // @TODO: Remember to change this!
-    defaultScopes = listOf("openid", "profile", "email"),
-    nonceManager = MemoryNonceGenerator
-)
-
 data class LoginSession(val authIssuer: String, val authUserId: String)
 
 @Suppress("unused", "UNUSED_PARAMETER") // Referenced in application.conf
@@ -90,35 +77,8 @@ fun Application.module(testing: Boolean = false) {
     //install(ForwardedHeaderSupport) // WARNING: for security, do not include this if not behind a reverse proxy
     //install(XForwardedHeaderSupport) // WARNING: for security, do not include this if not behind a reverse proxy
 
-    install(Authentication) {
-        openid("google-oauth") {
-            client = HttpClient(Apache)
-            providerLookup = { googleOauthProvider }
-            urlProvider = {
-                redirectUrl("/login")
-            }
-            skipWhen { call -> call.request.path() != "/login" && call.sessions.get<LoginSession>() != null }
-        }
-    }
 
     routing {
-        authenticate("google-oauth") {
-            route("/login") {
-                get {
-                    val principal = call.authentication.principal<OAuthAccessTokenResponse.OpenID>()
-                        ?: error("No principal")
-
-                    call.sessions.set(LoginSession(principal.jwtToken.issuer, principal.jwtToken.subject))
-
-                    call.respondText("Hello from login\n"+principal.jwtToken, contentType = ContentType.Text.Plain)
-                }
-            }
-            route("/testauthed"){
-                get {
-                    call.respondText { "You appear to be authed\n"+call.sessions.get<LoginSession>() }
-                }
-            }
-        }
 
         route("/api") {
             GeneratedEndpointList.ENDPOINTS.forEach { cmd->
