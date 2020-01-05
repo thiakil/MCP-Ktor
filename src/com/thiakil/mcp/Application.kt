@@ -1,5 +1,7 @@
 package com.thiakil.mcp
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.thiakil.ktor.openid.OAuthAccessTokenResponse
 import com.thiakil.ktor.openid.OAuthServerSettings
@@ -32,6 +34,8 @@ import io.ktor.routing.*
 import io.ktor.sessions.*
 import io.ktor.util.NonceManager
 import io.ktor.util.generateNonce
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import kotlin.collections.listOf
 import kotlin.collections.mapOf
 
@@ -52,6 +56,8 @@ object MemoryNonceGenerator: NonceManager {
 
 }
 
+val LOGGER: Logger = LoggerFactory.getLogger("com.thiakil.mcp")
+
 data class LoginSession(val authIssuer: String, val authUserId: String)
 
 @Suppress("unused", "UNUSED_PARAMETER") // Referenced in application.conf
@@ -60,6 +66,7 @@ fun Application.module(testing: Boolean = false) {
     install(ContentNegotiation) {
         jackson {
             registerKotlinModule()
+            setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
         }
     }
 
@@ -90,6 +97,7 @@ fun Application.module(testing: Boolean = false) {
                             e.respond(call)
                         } catch (e: Exception) {
                             ErrorResponseException(ErrorCode.UNKNOWN_ERROR, "Internal error").respond(call)
+                            LOGGER.error("Endpoint threw exception", e)
                         }
                     }
                 }
