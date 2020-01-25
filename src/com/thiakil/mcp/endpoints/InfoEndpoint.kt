@@ -1,6 +1,7 @@
 package com.thiakil.mcp.endpoints
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.thiakil.mcp.McpState
 import io.ktor.application.ApplicationCall
 import io.ktor.util.pipeline.PipelineContext
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -37,7 +38,7 @@ object InfoEndpoint : EndpointHandler<InfoResponse>(
     apiPath = "/",
     description = "Basic api info, combination of IRC commands versions, testcsv, and exports"
 ) {
-    override fun respond(context: PipelineContext<Unit, ApplicationCall>): InfoResponse {
+    override fun PipelineContext<Unit, ApplicationCall>.handleEndpoint(appData: McpState): InfoResponse {
         return InfoResponse(
             listOf(
                 McpVersion("1.2.3", "4.5.6", "snapshot"),

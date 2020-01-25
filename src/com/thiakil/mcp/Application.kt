@@ -1,7 +1,6 @@
 package com.thiakil.mcp
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.thiakil.mcp.api.MappedObject
 import com.thiakil.mcp.api.MappedName
@@ -12,28 +11,18 @@ import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.auth.Authentication
-import io.ktor.auth.authenticate
-import io.ktor.auth.authentication
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
 import io.ktor.features.*
-import io.ktor.http.ContentType
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
 import io.ktor.request.host
-import io.ktor.request.path
 import io.ktor.request.port
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.routing.*
-import io.ktor.sessions.*
+import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.NonceManager
 import io.ktor.util.generateNonce
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.collections.listOf
 import kotlin.collections.mapOf
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -57,9 +46,13 @@ val LOGGER: Logger = LoggerFactory.getLogger("com.thiakil.mcp")
 
 data class LoginSession(val authIssuer: String, val authUserId: String)
 
+@UseExperimental(KtorExperimentalAPI::class)
 @Suppress("unused", "UNUSED_PARAMETER") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+
+    val appState = McpState(environment.config)
+
     install(ContentNegotiation) {
         jackson {
             registerKotlinModule()
@@ -72,24 +65,25 @@ fun Application.module(testing: Boolean = false) {
         logger = LoggerFactory.getLogger("com.thiakil.mcp")
     }*/
 
-    install(Sessions) {
+    /*install(Sessions) {
         cookie<LoginSession>("MY_SESSION", SessionStorageMemory()) {
             //cookie.extensions["SameSite"] = "lax"
         }
-    }
+    }*/
 
     //install(ForwardedHeaderSupport) // WARNING: for security, do not include this if not behind a reverse proxy
     //install(XForwardedHeaderSupport) // WARNING: for security, do not include this if not behind a reverse proxy
 
-
     routing {
 
         route("/api") {
-            GeneratedEndpointList.ENDPOINTS.forEach { cmd->
+            for (cmd in GeneratedEndpointList.ENDPOINTS) {
                 route(cmd.apiPath, cmd.method) {
                     handle {
                         try {
-                            call.respond(cmd.respond(this))
+                            with(cmd){
+                                call.respond(handleEndpoint(appState))
+                            }
                         } catch (e: ErrorResponseException) {
                             e.respond(call)
                         } catch (e: Exception) {

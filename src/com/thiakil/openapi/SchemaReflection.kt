@@ -1,6 +1,7 @@
 package com.thiakil.openapi
 
 import com.fasterxml.jackson.annotation.JsonView
+import com.thiakil.mcp.endpoints.ListKClass
 import io.swagger.v3.core.util.AnnotationsUtils
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.media.*
@@ -118,6 +119,9 @@ fun getAnnotatedSchema(prop: KProperty<*>): Schema<*>? {
 
 val <T : Any> KClass<T>.openApiSchema: Schema<*> by LazyWithReceiver<KClass<T>, Schema<*>> {
     when {
+        this is ListKClass<*> -> ArraySchema().also {
+            it.items = this.listType.openApiSchema
+        }
         this === List::class -> ArraySchema().also {
             it.items = typeParameters[0].upperBounds[0].classifier?.openApiSchema
                 ?: throw RuntimeException("Not sure how to handle List")
@@ -159,6 +163,9 @@ val <T : Any> KClass<T>.openApiSchema: Schema<*> by LazyWithReceiver<KClass<T>, 
                     }
                     else ->
                         throw IllegalStateException("Reflected schema & annotation schema not same types: ${this.simpleName}")
+                }
+                if (prop.returnType.isMarkedNullable){
+                    type.nullable = true
                 }
                 schema.addProperties(prop.name, type)
             }
