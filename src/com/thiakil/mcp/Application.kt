@@ -3,9 +3,6 @@ package com.thiakil.mcp
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.thiakil.ktor.openid.OAuthAccessTokenResponse
-import com.thiakil.ktor.openid.OAuthServerSettings
-import com.thiakil.ktor.openid.openid
 import com.thiakil.mcp.api.MappedObject
 import com.thiakil.mcp.api.MappedName
 import com.thiakil.mcp.endpoints.ErrorCode
