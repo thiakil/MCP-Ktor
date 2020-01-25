@@ -160,39 +160,6 @@ object RedoChange : EndpointHandler<Unit>(
 )
 
 @Endpoint
-object RemoveFieldComment : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "rfc",
-    apiPath = "/manage/remove-field-comment/{name}",
-    pythonCallback = "removeComment",
-    groups = arrayOf("maintainer", "mcp_team"),
-    description = "Blanks out the field comment.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG
-)
-
-@Endpoint
-object RemoveMethodComment : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "rmc",
-    apiPath = "/manage/remove-method-comment/{name}",
-    pythonCallback = "removeComment",
-    groups = arrayOf("maintainer", "mcp_team"),
-    description = "Blanks out the method comment.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG
-)
-
-@Endpoint
-object RemoveParamComment : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "rpc",
-    apiPath = "/manage/remove-param-comment/{name}",
-    pythonCallback = "removeComment",
-    groups = arrayOf("maintainer", "mcp_team"),
-    description = "Blanks out the method parameter comment.",
-    parameters = Endpoints.SINGLE_NAME_PATH_ARG
-)
-
-@Endpoint
 object SetField : EndpointHandler<Unit>(
     Unit::class,
     ircCommand = "sf",
@@ -226,36 +193,4 @@ object SetParam : EndpointHandler<Unit>(
     parameters = Endpoints.SET_MEMBER_ARGS,
     allowDuringReadonly = false,
     method = HttpMethod.Post
-)
-
-@Endpoint
-object Lock : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "lock",
-    apiPath = "/manage/lock/{name}",
-    pythonCallback = "setLocked",
-    groups = arrayOf("lock_control", "mcp_team"),
-    description = "Locks the given field/method/parameter from being edited. Full SRG name must be used if member_type not specified.",
-    parameters = listOf(
-        Endpoints.NAME_PATH_ARG,
-        parameter("member_type", required = false)
-    ),
-    allowDuringReadonly = false,
-    method = HttpMethod.Patch
-)
-
-@Endpoint
-object Unlock : EndpointHandler<Unit>(
-    Unit::class,
-    ircCommand = "unlock",
-    apiPath = "/manage/unlock/{name}",
-    pythonCallback = "setLocked",
-    groups = arrayOf("lock_control", "mcp_team"),
-    description = "Unlocks the given field/method/parameter to allow editing. Full SRG name must be used if member_type not specified.",
-    parameters = listOf(
-        Endpoints.NAME_PATH_ARG,
-        parameter("member_type", required = false)
-    ),
-    allowDuringReadonly = false,
-    method = HttpMethod.Patch
 )
