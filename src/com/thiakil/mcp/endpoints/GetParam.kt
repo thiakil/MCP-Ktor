@@ -15,10 +15,12 @@ object GetParam : EndpointHandler<ParamInfo>(
     )
 )
 
-class ParamInfo: MemberInfo(){
-    val method_obf_name: String = ""
-    val method_srg_name: String = ""
-    val method_mcp_name: String? = null
-    val method_obf_descriptor: String = ""
-    val method_srg_descriptor: String? = ""
-}
+class ParamInfo(
+    mcpName: String, srgName: String, className: String, descriptor: String, visibility: String, comment: String,lastModified: MemberLastUpdate,
+    val method_obf_name: String,
+    val method_srg_name: String,
+    val method_mcp_name: String?,
+    val method_obf_descriptor: String,
+    val method_srg_descriptor: String?
+) : MemberInfo(mcpName, srgName, className, descriptor,visibility,comment, lastModified
+)
