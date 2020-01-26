@@ -1,6 +1,7 @@
 package com.thiakil.mcp.endpoints
 
 import com.thiakil.mcp.McpState
+import cuchaz.enigma.translation.representation.AccessFlags
 import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -32,6 +33,15 @@ abstract class EndpointHandler<T: Any>(
     @Throws(ErrorResponseException::class)
     open fun PipelineContext<Unit, ApplicationCall>.handleEndpoint(appData: McpState): T {
         throw ErrorResponseException(ErrorCode.NOT_FOUND, "Endpoint not implemented")
+    }
+
+    protected fun AccessFlags.visibilityString(): String {
+        return when {
+            isPublic -> "public"
+            isPrivate -> "private"
+            isProtected -> "protected"
+            else -> "package"
+        }
     }
 }
 
