@@ -28,6 +28,7 @@ repositories {
     jcenter()
     maven { url 'https://kotlin.bintray.com/ktor' }
     maven { url 'https://kotlin.bintray.com/kotlinx' }
+    maven { url 'https://maven.fabricmc.net/' }
 }
 
 dependencies {
@@ -62,6 +63,8 @@ dependencies {
 
     compile "io.swagger.core.v3:swagger-core:$swagger_core_version"
 
+    compile "cuchaz:enigma:$enigma_version:lib"
+
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
 
     kapt project(":endpoint-annotation")
@@ -70,4 +73,11 @@ dependencies {
 
 kapt {
     includeCompileClasspath = true
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = ['-Xuse-experimental=kotlin.Experimental']
+    }
 }
