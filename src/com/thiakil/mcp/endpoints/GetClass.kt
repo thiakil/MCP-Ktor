@@ -1,11 +1,13 @@
 package com.thiakil.mcp.endpoints
 
 import com.thiakil.mcp.McpState
+import cuchaz.enigma.translation.representation.AccessFlags
 import cuchaz.enigma.translation.representation.entry.ClassEntry
 import io.ktor.application.ApplicationCall
 import io.ktor.util.pipeline.PipelineContext
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
+import net.minecraftforge.api.distmarker.Dist
 
 @Endpoint
 object GetClass : EndpointHandler<List<GetClassResult>>(
@@ -18,7 +20,7 @@ object GetClass : EndpointHandler<List<GetClassResult>>(
 ) {
     override fun PipelineContext<Unit, ApplicationCall>.handleEndpoint(appData: McpState): List<GetClassResult> {
         val className = context.parameters["name"]?.replace('.', '/') ?: throw ErrorResponseException(ErrorCode.BAD_PARAMETERS, "Missing name parameter")
-        return appData.index.classes.filter { it.name == className }.map { cls ->
+        return appData.index.classes.values.filter { it.name == className }.map { cls ->
             GetClassResult(
                 srgName = cls.fullName,
                 superName = when(val superN = cls.superClass?.fullName){
@@ -27,23 +29,17 @@ object GetClass : EndpointHandler<List<GetClassResult>>(
                 },
                 outerName = cls.outerClass?.fullName,
                 interfaces = cls.interfaces?.map(ClassEntry::getFullName),
-                extenders = appData.index.classes.filter { it.superClass == cls }.map(ClassEntry::getFullName),
-                implementers = if (cls.access.isInterface) appData.index.classes.filter { it.interfaces?.contains(cls) ?: false }.map(ClassEntry::getFullName) else null,
-                visibility = with(cls.access){
-                    when {
-                        isPublic -> "public"
-                        isPrivate -> "private"
-                        isProtected -> "protected"
-                        else -> "package"
-                    }
-                },
+                extenders = appData.index.classes.values.filter { it.superClass == cls }.map(ClassEntry::getFullName),
+                implementers = if (cls.access.isInterface) appData.index.classes.values.filter { it.interfaces?.contains(cls) ?: false }.map(ClassEntry::getFullName) else null,
+                visibility = cls.access.visibilityString(),
                 classType = with(cls.access) {
                     when {
                         isInterface -> "interface"
                         isEnum -> "enum"
                         else -> null
                     }
-                }
+                },
+                distMarker = cls.dist
             )
         }
     }
@@ -71,5 +67,6 @@ data class GetClassResult(
     @field:Schema(allowableValues = ["public", "protected", "private", "package"])
     val visibility: String,
     @field:Schema(description = "If enum or interface, specifies the type. Not present for normal classes.",allowableValues = ["enum", "interface"], nullable = true)
-    val classType: String?
+    val classType: String?,
+    val distMarker: Dist?
 )
