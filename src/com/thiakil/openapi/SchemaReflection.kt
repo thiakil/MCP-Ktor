@@ -13,6 +13,7 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
@@ -134,6 +135,11 @@ val <T : Any> KClass<T>.openApiSchema: Schema<*> by LazyWithReceiver<KClass<T>, 
         this == Float::class || this == Double::class || this == BigInteger::class -> NumberSchema()
         this == Boolean::class -> BooleanSchema()
         this == Date::class -> DateTimeSchema()
+        this.isSubclassOf(Enum::class) -> StringSchema().also { schema ->
+            @Suppress("UNCHECKED_CAST")
+            this as KClass<Enum<*>>
+            schema._enum(this.java.enumConstants.map { el -> el.name })
+        }
         this == Unit::class -> ObjectSchema()
         else -> Schema<T>().also { schema ->
             schema.name = this.simpleName
